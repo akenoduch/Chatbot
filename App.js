@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList, Text } from 'react-native';
 import { Button, Input, ListItem } from 'react-native-elements';
 import axios from 'axios';
 
@@ -8,16 +8,21 @@ const CHATGPT_API_KEY = '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';
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  let messageCount = 0;
+
 
   useEffect(() => {
     // Função para enviar a mensagem para a API do ChatGPT
     const sendMessageToChatGPT = async () => {
       try {
+        console.log('Enviando mensagem para o ChatGPT:', inputMessage);
+
         const response = await axios.post(
           'https://api.openai.com/v1/engines/davinci-codex/completions',
           {
             prompt: `Você: ${inputMessage}\nChatGPT: `,
-            max_tokens: 50,
+            max_tokens: 500,
             temperature: 0.7,
             n: 1,
             stop: '\n'
@@ -29,59 +34,71 @@ export default function App() {
             }
           }
         );
-        
+
+        console.log('Resposta recebida do ChatGPT:', response.data.choices[0].text.trim());
+
         const message = {
-          id: Date.now().toString(),
+          id: `${Date.now().toString()}-${messageCount}`,
           text: inputMessage,
           isUserMessage: true
         };
-        
+
         const chatGPTMessage = {
-          id: Date.now().toString(),
+          id: `${Date.now().toString()}-${messageCount + 1}`,
           text: response.data.choices[0].text.trim(),
           isUserMessage: false
         };
-        
+
+        messageCount += 2;
+
+        console.log('Mensagens a serem adicionadas:', [message, chatGPTMessage]);
+
         setMessages((messages) => [...messages, message, chatGPTMessage]);
-        setInputMessage('');
+        setInputValue('');
+
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao enviar mensagem para o ChatGPT:', error);
       }
     };
-    
+
     if (inputMessage && inputMessage.trim().length > 0) {
       sendMessageToChatGPT();
     }
   }, [inputMessage]);
 
+  console.log('Mensagens exibidas na tela:', messages);
+
   return (
     <View style={styles.container} platform="ios">
-      <FlatList
-        data={messages}
-        renderItem={({ item }) => (
-          <ListItem
-            containerStyle={[
+      <View style={styles.messageList}>
+        {messages.map((message) => (
+          <View
+            key={message.id}
+            style={[
               styles.messageBubble,
-              item.isUserMessage ? styles.userMessageBubble : styles.chatGPTMessageBubble
+              message.isUserMessage ? styles.userMessageBubble : styles.chatGPTMessageBubble
             ]}
-            title={item.text}
-            titleStyle={styles.messageText}
-          />
-        )}
-        keyExtractor={(item, index) => item.id + index}
-      />
+          >
+            <Text style={styles.messageText}>{message.text}</Text>
+          </View>
+        ))}
+      </View>
       <View style={styles.inputContainer}>
         <Input
           containerStyle={styles.input}
           placeholder="Digite sua mensagem"
-          value={inputMessage}
-          onChangeText={setInputMessage}
+          value={inputValue}
+          onChangeText={setInputValue}
         />
         <Button
           containerStyle={styles.buttonContainer}
           buttonStyle={styles.button}
           title="Enviar"
-          onPress={() => setInputMessage(inputMessage.trim())}
+          onPress={() => {
+            setInputMessage(inputValue.trim());
+            setInputValue('');
+          }}
+          
         />
       </View>
     </View>
@@ -105,7 +122,7 @@ const styles = StyleSheet.create({
   },
   chatGPTMessageBubble: {
     alignSelf: 'flex-start',
-    backgroundColor: '#e5e5ea'
+    backgroundColor: 'purple'
   },
   messageText: {
     color: '#fff'
