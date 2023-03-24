@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, FlatList, Text } from 'react-native';
-import { Button, Input, ListItem } from 'react-native-elements';
+import { StyleSheet, View, Text } from 'react-native';
+import { Button, Input } from 'react-native-elements';
 import axios from 'axios';
 
-const CHATGPT_API_KEY = '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';
+const CHATGPT_API_KEY = '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';
+const ENGINE_NAME = 'babbage';
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -19,7 +20,7 @@ export default function App() {
         console.log('Enviando mensagem para o ChatGPT:', inputMessage);
 
         const response = await axios.post(
-          'https://api.openai.com/v1/engines/davinci-codex/completions',
+          'https://api.openai.com/v1/engines/davinci/completions',
           {
             prompt: `Você: ${inputMessage}\nChatGPT: `,
             max_tokens: 500,
@@ -87,6 +88,7 @@ export default function App() {
         <Input
           containerStyle={styles.input}
           placeholder="Digite sua mensagem"
+          placeholderTextColor="white"
           value={inputValue}
           onChangeText={setInputValue}
         />
@@ -108,8 +110,9 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
-    padding: 20
+    backgroundColor: 'black',
+    padding: 20,
+    marginTop: 40,
   },
   messageBubble: {
     borderRadius: 10,
@@ -118,33 +121,34 @@ const styles = StyleSheet.create({
   },
   userMessageBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: '#007aff'
+    backgroundColor: '#6000fc'
   },
   chatGPTMessageBubble: {
     alignSelf: 'flex-start',
-    backgroundColor: 'purple'
+    backgroundColor: '#353535'
   },
   messageText: {
-    color: '#fff'
+    color: 'white'
   },
   inputContainer: {
+    position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10
+    marginBottom: 10,
+    bottom: 0
   },
   input: {
     flex: 1,
     marginRight: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#353535',
     borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ccc'
+    color: 'white'
   },
   buttonContainer: {
     borderRadius: 5
   },
   button: {
-    backgroundColor: '#007aff',
+    backgroundColor: '#6000fc',
     borderRadius: 5
   }
 });
